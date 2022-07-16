@@ -1,8 +1,8 @@
 FROM php:8.0-fpm-alpine
 
-RUN #apk add --no-cache nginx wget
+RUN apk add --no-cache nginx wget
 
-RUN apk add --no-cache nginx wget --virtual build-dependencies build-base openssl-dev autoconf \
+RUN apk add --virtual build-dependencies build-base openssl-dev autoconf \
   && pecl install mongodb \
   && docker-php-ext-enable mongodb \
   && apk del build-dependencies build-base openssl-dev autoconf \
@@ -21,4 +21,4 @@ RUN cd /app && \
 
 RUN chown -R www-data: /app
 
-#CMD sh /app/docker/startup.sh
+CMD sh /app/docker/startup.sh
