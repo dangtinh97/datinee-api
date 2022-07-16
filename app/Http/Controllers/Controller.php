@@ -10,8 +10,5 @@ use MongoDB\BSON\UTCDateTime;
 
 class Controller extends BaseController
 {
-    public function a(){
-        new UTCDateTime();
-    }
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 }
