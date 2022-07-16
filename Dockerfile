@@ -1,19 +1,24 @@
-FROM composer:2.1.10 as build
-WORKDIR /app
+FROM php:8.0-fpm-alpine
+
+RUN #apk add --no-cache nginx wget
+
+RUN apk add --no-cache nginx wget --virtual build-dependencies build-base openssl-dev autoconf \
+  && pecl install mongodb \
+  && docker-php-ext-enable mongodb \
+  && apk del build-dependencies build-base openssl-dev autoconf \
+  && rm -rf /var/cache/apk/*
+
+RUN mkdir -p /run/nginx
+
+COPY docker/nginx.conf /etc/nginx/nginx.conf
+
+RUN mkdir -p /app
 COPY . /app
-RUN composer install && composer dumpautoload
 
-FROM php:8.1.0RC5-apache-buster
-RUN docker-php-ext-install pdo pdo_mysql mysqli
+RUN sh -c "wget http://getcomposer.org/composer.phar && chmod a+x composer.phar && mv composer.phar /usr/local/bin/composer"
+RUN cd /app && \
+    /usr/local/bin/composer install --no-dev
 
-RUN apt-get install -y autoconf pkg-config libssl-dev
-RUN pecl install mongodb
-RUN echo "extension=mongodb.so" >> /usr/local/etc/php/conf.d/mongodb.ini
+RUN chown -R www-data: /app
 
-EXPOSE 8080
-COPY --from=build /app /var/www/
-COPY docker/000-default.conf /etc/apache2/sites-available/000-default.conf
-RUN chmod 777 -R /var/www/storage/ && \
-  echo "Listen 8080">>/etc/apache2/ports.conf && \
-  chown -R www-data:www-data /var/www/ && \
-  a2enmod rewrite
+#CMD sh /app/docker/startup.sh
