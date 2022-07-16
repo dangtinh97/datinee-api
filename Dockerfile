@@ -1,10 +1,19 @@
-FROM php:8.0-apache
-COPY ./ /var/www/html
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends openssl libssl-dev libcurl4-openssl-dev \
-    && pecl install mongodb \
-    && cp /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini \
-    && echo "extension=mongodb.so" >> /usr/local/etc/php/php.ini \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
-EXPOSE 80
+FROM php:8.1-fpm-alpine
+
+RUN apk add --no-cache nginx wget
+
+RUN mkdir -p /run/nginx
+
+COPY docker/nginx.conf /etc/nginx/nginx.conf
+
+RUN mkdir -p /app
+COPY . /app
+COPY ./src /app
+
+RUN sh -c "wget http://getcomposer.org/composer.phar && chmod a+x composer.phar && mv composer.phar /usr/local/bin/composer"
+RUN cd /app && \
+    /usr/local/bin/composer install --no-dev
+
+RUN chown -R www-data: /app
+
+CMD sh /app/docker/startup.sh
