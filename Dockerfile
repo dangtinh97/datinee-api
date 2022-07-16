@@ -7,7 +7,7 @@ RUN composer install && composer dumpautoload
 FROM php:8.1.0RC5-apache-buster
 RUN docker-php-ext-install pdo pdo_mysql mysqli
 RUN pecl install mongodb && docker-php-ext-enable mongodb
-
+RUN set libssl-dev
 
 EXPOSE 8080
 COPY --from=build /app /var/www/
