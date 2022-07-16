@@ -15,3 +15,4 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::post('login-with-facebook',[\App\Http\Controllers\Api\AuthController::class,'loginFacebook']);
+Route::get('login-with-facebook',[\App\Http\Controllers\Api\AuthController::class,'loginFacebook']);
