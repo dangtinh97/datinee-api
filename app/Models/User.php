@@ -2,17 +2,42 @@
 
 namespace App\Models;
 
-//use Illuminate\Contracts\Auth\MustVerifyEmail;
-//use Illuminate\Database\Eloquent\Factories\HasFactory;
-//use Illuminate\Foundation\Auth\User as Authenticatable;
-//use Illuminate\Notifications\Notifiable;
-//use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Auth\Authenticatable;
+use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
+use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 
+use App\Traits\SoftDelete\SoftDeletes;
 use Jenssegers\Mongodb\Eloquent\Model;
 
-class User extends Model
+class User extends Model implements AuthenticatableContract, AuthorizableContract,JWTSubject
 {
+    use Authenticatable, SoftDeletes;
+
     protected $collection = 'dt_users';
+
+    protected $fillable = [
+        'id',
+        'fb_uid',
+        'full_name',
+        'age',
+        'password',
+        'email',
+        'mobile',
+        'google_id',
+        'verify_account',
+        'status',
+        'region',
+        'location',
+        'address',
+        'care_about_gender',
+        'introduce',
+        'tokens_notification'
+    ];
+
+    const STATUS_NORMAL = "NORMAL";
+
+    const AVATAR_DEFAULT_URL = "/chatbot-default.jpeg";
 //    use HasApiTokens, HasFactory, Notifiable;
 //
 //    /**
@@ -44,4 +69,29 @@ class User extends Model
 //    protected $casts = [
 //        'email_verified_at' => 'datetime',
 //    ];
+
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
+
+    /**
+     * Return a key value array, containing any custom claims to be added to the JWT.
+     *
+     * @return array
+     */
+    public function getJWTCustomClaims()
+    {
+        return [];
+    }
+
+    public function can($abilities, $arguments = [])
+    {
+        // TODO: Implement can() method.
+    }
+
+    public function urlAvatar ()
+    {
+        return $this->hasOne(Attachment::class,'_id','avatar');
+    }
 }

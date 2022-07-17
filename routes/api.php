@@ -15,4 +15,16 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::post('login-with-facebook',[\App\Http\Controllers\Api\AuthController::class,'loginFacebook']);
-Route::get('login-with-facebook',[\App\Http\Controllers\Api\AuthController::class,'loginFacebook']);
+Route::get('/setup-app',[\App\Http\Controllers\Api\SetupAppController::class,'index']);
+Route::group([
+    'middleware' => 'auth.api'
+],function (){
+    Route::post("/attachments",[\App\Http\Controllers\Api\AttachmentController::class,'store']);
+    Route::post('/favorites',[\App\Http\Controllers\Api\UserController::class,'storeFavorite']);
+    Route::get('/me',[\App\Http\Controllers\Api\UserController::class,'infoMe']);
+    Route::patch('/me',[\App\Http\Controllers\Api\UserController::class,'updateInfo']);
+    Route::patch('/me/lat-long',[\App\Http\Controllers\Api\UserController::class,'updateLatLong']);
+    Route::post('/images',[\App\Http\Controllers\Api\UserController::class,'storeImage']);
+    Route::patch('/images',[\App\Http\Controllers\Api\UserController::class,'updateImage']);
+});
+
