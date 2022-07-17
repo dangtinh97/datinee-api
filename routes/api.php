@@ -26,5 +26,7 @@ Route::group([
     Route::patch('/me/lat-long',[\App\Http\Controllers\Api\UserController::class,'updateLatLong']);
     Route::post('/images',[\App\Http\Controllers\Api\UserController::class,'storeImage']);
     Route::patch('/images',[\App\Http\Controllers\Api\UserController::class,'updateImage']);
+
+    Route::post('/follows',[\App\Http\Controllers\Api\FollowController::class,'store']);
 });
 

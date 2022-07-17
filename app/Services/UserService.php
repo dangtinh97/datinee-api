@@ -87,6 +87,10 @@ class UserService
      */
     public function updateInfo(array $data): ApiResponse
     {
+        $data = array_filter($data,function ($value,$key){
+            return !empty($value);
+        },ARRAY_FILTER_USE_BOTH);
+
         $listFavorite = $data['list_favorite'] ?? [];
         Arr::forget($data, 'list_favorite');
 
@@ -182,6 +186,7 @@ class UserService
          * "gender": ""
          */
         $user = $this->userRepository->infoMe(Auth::user()->_id);
+
         $favoritesConfig = $this->setupAppRepository->findOne([
                 'type' => 'LIST_FAVORITE'
             ])->data ?? [];
@@ -199,6 +204,16 @@ class UserService
                 'label' => $favoritesConfig[$search][$this->lang]
             ];
         }
+        $images = [];
+
+        foreach ($user->images ?? [] as $img){
+            if(empty($img['attachments'])) continue;
+            $images[] = [
+                'image_oid' => $img['_id']->__toString(),
+                'attachment_oid' => $img['attachment_oid']->__toString(),
+                'url' => GoogleCloudStorageHelper::getUrl().$img['attachments'][0]['path']
+            ];
+        }
 
         return new ResponseSuccess([
             'user_oid' => $user->_id,
@@ -210,7 +225,8 @@ class UserService
             'latitude' => Arr::get($user->location, 'coordinates.1' ?? ""),
             'longitude' => Arr::get($user->location, 'coordinates.0' ?? ""),
             'avatar' => $avatar,
-            'favorites' => $favorites
+            'favorites' => $favorites,
+            'images' => $images
         ]);
     }
 }

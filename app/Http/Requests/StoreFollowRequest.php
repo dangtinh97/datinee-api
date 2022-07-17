@@ -4,8 +4,9 @@ namespace App\Http\Requests;
 
 use App\Http\Responses\ApiFormRequest;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
-class UpdateImageRequest extends ApiFormRequest
+class StoreFollowRequest extends ApiFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -25,10 +26,8 @@ class UpdateImageRequest extends ApiFormRequest
     public function rules()
     {
         return [
-            'add_images' => 'array',
-            'add_images.*' => 'object_id',
-            'delete_images' => 'array',
-            'delete_images.*' => 'object_id',
+            'user_oid' => 'required|object_id',
+            'type' => ['required',Rule::in(['NOPE','LIKE','SUPPER_LIKE'])]
         ];
     }
 }

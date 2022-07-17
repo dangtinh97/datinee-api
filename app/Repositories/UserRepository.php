@@ -21,30 +21,59 @@ class UserRepository extends BaseRepository
      */
     public function infoMe(string $userOid)
     {
-        return $this->model::raw(function ($collection) use ($userOid) {
-            return $collection->aggregate([
-                [
-                    '$match' => [
-                        '_id' => (new ObjectId($userOid))
+        try{
+            return $this->model::raw(function ($collection) use ($userOid) {
+                return $collection->aggregate([
+                    [
+                        '$match' => [
+                            '_id' => (new ObjectId($userOid))
+                        ],
                     ],
-                ],
-                [
-                    '$lookup' => [
-                        'from' => 'dt_attachments',
-                        'localField' => 'avatar',
-                        'foreignField' => '_id',
-                        'as' => "avatars"
-                    ]
-                ],
-                [
-                    '$lookup' => [
-                        'from' => 'dt_favorites',
-                        'localField' => 'id',
-                        'foreignField' => 'user_id',
-                        'as' => "favorites"
-                    ]
-                ],
-            ],BaseRepository::OPTION_RESPONSE);
-        })->first();
+                    [
+                        '$lookup' => [
+                            'from' => 'dt_attachments',
+                            'localField' => 'avatar',
+                            'foreignField' => '_id',
+                            'as' => "avatars"
+                        ]
+                    ],
+                    [
+                        '$lookup' => [
+                            'from' => 'dt_user_images',
+                            'let' => ['user_id'=>'$id'],
+                            'pipeline' => [
+                                [
+                                    '$match' => [
+                                        '$expr' => [
+                                            '$eq' => ['$user_id','$$user_id']
+                                        ]
+                                    ]
+                                ],
+                                [
+                                    '$lookup' => [
+                                        'from' => 'dt_attachments',
+                                        'localField' => "attachment_oid",
+                                        'foreignField' => '_id',
+                                        'as' => "attachments"
+                                    ]
+                                ]
+                            ],
+                            'as' => "images"
+                        ]
+                    ],
+                    [
+                        '$lookup' => [
+                            'from' => 'dt_favorites',
+                            'localField' => 'id',
+                            'foreignField' => 'user_id',
+                            'as' => "favorites"
+                        ]
+                    ],
+                ],BaseRepository::OPTION_RESPONSE);
+            })->first();
+        }catch (\Exception $exception){
+            dd($exception->getMessage(),$exception->getLine(),$exception->getFile());
+        }
+
     }
 }

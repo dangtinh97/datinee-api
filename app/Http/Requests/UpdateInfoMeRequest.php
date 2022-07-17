@@ -26,9 +26,10 @@ class UpdateInfoMeRequest extends ApiFormRequest
     public function rules()
     {
         return [
-            'age' => 'required|numeric',
-            'care_about_gender' => ['required',Rule::in(['MALE', 'FEMALE'])],
-            'gender' => ['required',Rule::in(['MALE', 'FEMALE'])],
+            'age' => 'numeric',
+            'care_about_gender' => [Rule::in(['MALE', 'FEMALE'])],
+            'gender' => [Rule::in(['MALE', 'FEMALE'])],
+            'avatar' => 'object_id'
         ];
     }
 }

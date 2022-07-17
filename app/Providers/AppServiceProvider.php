@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Helpers\StrHelper;
+use Illuminate\Auth\Events\Validated;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -23,6 +25,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        app('validator')->extend('object_id', function ($attribute, $value) {
+            return StrHelper::isObjectId($value);
+        });
     }
 }
