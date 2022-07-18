@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::post('login-with-facebook',[\App\Http\Controllers\Api\AuthController::class,'loginFacebook']);
+Route::post('login-with-email',[\App\Http\Controllers\Api\AuthController::class,'loginWithEmail']);
 Route::post('register-with-email',[\App\Http\Controllers\Api\AuthController::class,'registerWithEmail']);
 Route::get('/setup-app',[\App\Http\Controllers\Api\SetupAppController::class,'index']);
 Route::group([
@@ -31,5 +32,6 @@ Route::group([
     Route::post('/follows',[\App\Http\Controllers\Api\FollowController::class,'store']);
     Route::get("/users/{user_oid}",[\App\Http\Controllers\Api\UserController::class,'infoUser']);
     Route::get('/matching',[\App\Http\Controllers\Api\MatchingController::class,'index']);
+    Route::get('/messages/{user_oid}',[\App\Http\Controllers\Api\ChatController::class,'message']);
 });
 

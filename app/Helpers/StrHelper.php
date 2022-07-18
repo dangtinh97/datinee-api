@@ -2,6 +2,9 @@
 
 namespace App\Helpers;
 
+use App\Models\Attachment;
+use App\Models\User;
+
 class StrHelper
 {
     /**
@@ -30,7 +33,7 @@ class StrHelper
      */
     public static function securedEncrypt($data,string $md5Key):string
     {
-        $data= openssl_encrypt($data, 'aes-256-cbc', $md5Key, OPENSSL_RAW_DATA, substr($md5Key,16));
+        $data= openssl_encrypt($data, 'aes-256-cbc', $md5Key, OPENSSL_RAW_DATA, substr($md5Key,0,16));
         return base64_encode($data);
     }
 
@@ -42,6 +45,17 @@ class StrHelper
      */
     public static function securedDecrypt(string $dataEncrypt,string $md5Key):string
     {
-        return openssl_decrypt(base64_decode($dataEncrypt), 'aes-256-cbc', $md5Key, OPENSSL_RAW_DATA, substr($md5Key,16));
+        return openssl_decrypt(base64_decode($dataEncrypt), 'aes-256-cbc', $md5Key, OPENSSL_RAW_DATA, substr($md5Key,0,16));
+    }
+
+    /**
+     * @param \App\Models\Attachment|null $attachment
+     *
+     * @return string
+     */
+    public static function urlFromAttachment(?Attachment $attachment):string
+    {
+        if(is_null($attachment)) return GoogleCloudStorageHelper::getUrl().User::AVATAR_DEFAULT_URL;
+        return GoogleCloudStorageHelper::getUrl($attachment->bucket ?? "").$attachment->path;
     }
 }

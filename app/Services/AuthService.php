@@ -145,7 +145,31 @@ class AuthService
         $userOid = StrHelper::securedDecrypt($encode,md5($user->_id));
 
         if($userOid==="") return "";
+        $user->update([
+            'verify_account' => true
+        ]);
         $login = $this->authLogin($user);
         return $login->getData()['token'];
+    }
+
+    /**
+     * @param string $email
+     * @param string $password
+     *
+     * @return \App\Http\Responses\ApiResponse
+     */
+    public function loginWithEmail(string $email, string $password):ApiResponse
+    {
+        /** @var User|null $user */
+        $user = $this->userRepository->findOne([
+            'email' => $email
+        ]);
+
+        if(is_null($user) || !Hash::check($password,$user->password)) return new ResponseError(201,'Tên tài khoản hoặc mật khẩu không chính xác');
+
+        if(!$user->verify_account) return new ResponseError(202,"Tài khoản khoản chưa được xác thực");
+
+        return $this->authLogin($user);
+
     }
 }

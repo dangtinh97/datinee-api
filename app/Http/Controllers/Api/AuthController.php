@@ -37,11 +37,14 @@ class AuthController extends Controller
         return response()->json($register->toArray());
     }
 
-    public function verifyEmail(Request $request)
+    /**
+     * @param \App\Http\Requests\RegisterWithEmailRequest $request
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function loginWithEmail(RegisterWithEmailRequest $request):JsonResponse
     {
-        $userId = (int)$request->get('user_id');
-        $encode = $request->get('token');
-        $response = $this->authService->verifyEmail($userId,$encode);
-        return view('verify_email',compact('response'));
+        $login = $this->authService->loginWithEmail($request->get('email'),$request->get('password'));
+        return response()->json($login->toArray());
     }
 }

@@ -5,6 +5,9 @@ namespace App\Models;
 use App\Traits\SoftDelete\SoftDeletes;
 use Jenssegers\Mongodb\Eloquent\Model;
 
+/**
+ * @property string $path
+ */
 class Attachment extends Model
 {
     use SoftDeletes;

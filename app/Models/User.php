@@ -10,6 +10,15 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
 use App\Traits\SoftDelete\SoftDeletes;
 use Jenssegers\Mongodb\Eloquent\Model;
 
+/** @property boolean $verify_account */
+
+/** @property string $password */
+
+/** @property int $id
+ * @property mixed $_id
+ * @property \App\Models\Attachment|null $urlAvatar
+ */
+
 class User extends Model implements AuthenticatableContract, AuthorizableContract,JWTSubject
 {
     use Authenticatable, SoftDeletes;

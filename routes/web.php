@@ -17,4 +17,5 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/verify-email',[\App\Http\Controllers\Api\AuthController::class,'verifyEmail'])->name('verify.email');
+Route::get('/verify-email',[\App\Http\Controllers\AuthController::class,'verifyEmail'])->name('verify.email');
+Route::get('chat',[\App\Http\Controllers\AuthController::class,'chat']);
