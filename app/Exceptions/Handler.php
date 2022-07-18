@@ -5,6 +5,7 @@ namespace App\Exceptions;
 use App\Http\Responses\ResponseError;
 use Google\Cloud\Core\Exception\NotFoundException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
 
@@ -48,7 +49,13 @@ class Handler extends ExceptionHandler
     {
         $this->renderable(function (NotFoundHttpException $e, $request) {
             if ($request->is('api/*')) {
-                return response()->json((new ResponseError(404,"Page Not Found!"))->toArray());
+                return response()->json((new ResponseError($e->getStatusCode(),"NOT FOUND!"))->toArray());
+            }
+        });
+
+        $this->renderable(function (MethodNotAllowedHttpException $e,$request){
+            if ($request->is('api/*')) {
+                return response()->json((new ResponseError($e->getStatusCode(),$e->getMessage()))->toArray());
             }
         });
 

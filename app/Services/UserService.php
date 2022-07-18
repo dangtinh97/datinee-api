@@ -154,6 +154,61 @@ class UserService
         return new ResponseSuccess();
     }
 
+    /**
+     * @param string $userOid
+     *
+     * @return \App\Http\Responses\ApiResponse
+     */
+    public function infoUser(string $userOid):ApiResponse
+    {
+        $user = $this->userRepository->infoMe($userOid,true, true,true);
+
+        $favoritesConfig = $this->setupAppRepository->findOne([
+                'type' => 'LIST_FAVORITE'
+            ])->data ?? [];
+        $avatar = GoogleCloudStorageHelper::getUrl($user->region ?? "") . (!empty($user->avatars) ? $user->avatars[0]['path'] : User::AVATAR_DEFAULT_URL);
+        $favorites = [];
+
+        $userFavorites = array_column($user->favorites ?? [],'key');
+
+        foreach ($userFavorites as $key)
+        {
+            $search = array_search($key , array_column($favoritesConfig,'key'));
+            if($search===false) continue ;
+            $favorites[] = [
+                'key' => $key,
+                'label' => $favoritesConfig[$search][$this->lang]
+            ];
+        }
+        $images = [];
+
+        foreach ($user->images ?? [] as $img){
+            if(empty($img['attachments'])) continue;
+            $images[] = [
+                'image_oid' => $img['_id']->__toString(),
+                'attachment_oid' => $img['attachment_oid']->__toString(),
+                'url' => GoogleCloudStorageHelper::getUrl().$img['attachments'][0]['path'],
+                'is_avatar' => false
+            ];
+        }
+
+        return new ResponseSuccess([
+            'user_oid' => $user->_id,
+            'user_id' => $user->id,
+            'gender' => Arr::get($user, 'gender', ''),
+            'address' => Arr::get($user, 'address', ''),
+            'age' => Arr::get($user, 'age', ''),
+            'introduce' => Arr::get($user, 'introduce', ''),
+            'latitude' => Arr::get($user->location, 'coordinates.1' , ""),
+            'longitude' => Arr::get($user->location, 'coordinates.0' , ""),
+            'avatar' => $avatar,
+            'favorites' => $favorites,
+            'images' => $images,
+            'matching' => $user->matches ? $user->matches[0]['type'] : "",
+            'follow' => $user->follows ? $user->follows[0]['type'] : ""
+        ]);
+    }
+
     public function infoMe(): ApiResponse
     {
         /**
@@ -204,16 +259,6 @@ class UserService
                 'label' => $favoritesConfig[$search][$this->lang]
             ];
         }
-        $images = [];
-
-        foreach ($user->images ?? [] as $img){
-            if(empty($img['attachments'])) continue;
-            $images[] = [
-                'image_oid' => $img['_id']->__toString(),
-                'attachment_oid' => $img['attachment_oid']->__toString(),
-                'url' => GoogleCloudStorageHelper::getUrl().$img['attachments'][0]['path']
-            ];
-        }
 
         return new ResponseSuccess([
             'user_oid' => $user->_id,
@@ -222,11 +267,32 @@ class UserService
             'address' => Arr::get($user, 'address', ''),
             'age' => Arr::get($user, 'age', ''),
             'introduce' => Arr::get($user, 'introduce', ''),
-            'latitude' => Arr::get($user->location, 'coordinates.1' ?? ""),
-            'longitude' => Arr::get($user->location, 'coordinates.0' ?? ""),
+            'latitude' => Arr::get($user->location, 'coordinates.1' , ""),
+            'longitude' => Arr::get($user->location, 'coordinates.0' , ""),
             'avatar' => $avatar,
             'favorites' => $favorites,
-            'images' => $images
+        ]);
+    }
+
+    /**
+     * @param string $lastOid
+     * @param string $userOid
+     *
+     * @return \App\Http\Responses\ApiResponse
+     */
+    public function listImage(string $lastOid="",string $userOid):ApiResponse
+    {
+        $list = $this->userImageRepository->listImage($userOid,$lastOid);
+        $data = $list->map(function ($item){
+           return [
+               'image_oid' => $item->image_oid,
+               'attachment_oid' => $item->attachment_oid,
+               'url' => GoogleCloudStorageHelper::getUrl().$item->image['path'],
+               'is_avatar' => is_null(Auth::user()?->avatar) ? false : Auth::user()->avatar->__toString()===$item->attachment_oid
+           ] ;
+        })->toArray();
+        return new ResponseSuccess([
+            'images' => $data
         ]);
     }
 }

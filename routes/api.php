@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::post('login-with-facebook',[\App\Http\Controllers\Api\AuthController::class,'loginFacebook']);
+Route::post('register-with-email',[\App\Http\Controllers\Api\AuthController::class,'registerWithEmail']);
 Route::get('/setup-app',[\App\Http\Controllers\Api\SetupAppController::class,'index']);
 Route::group([
     'middleware' => 'auth.api'
@@ -24,9 +25,11 @@ Route::group([
     Route::get('/me',[\App\Http\Controllers\Api\UserController::class,'infoMe']);
     Route::patch('/me',[\App\Http\Controllers\Api\UserController::class,'updateInfo']);
     Route::patch('/me/lat-long',[\App\Http\Controllers\Api\UserController::class,'updateLatLong']);
+    Route::get("/images/{user_oid}",[\App\Http\Controllers\Api\UserController::class,'listImage']);
     Route::post('/images',[\App\Http\Controllers\Api\UserController::class,'storeImage']);
     Route::patch('/images',[\App\Http\Controllers\Api\UserController::class,'updateImage']);
-
     Route::post('/follows',[\App\Http\Controllers\Api\FollowController::class,'store']);
+    Route::get("/users/{user_oid}",[\App\Http\Controllers\Api\UserController::class,'infoUser']);
+    Route::get('/matching',[\App\Http\Controllers\Api\MatchingController::class,'index']);
 });
 

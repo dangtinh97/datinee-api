@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Helpers\StrHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreFavoriteRequest;
 use App\Http\Requests\StoreImageRequest;
 use App\Http\Requests\UpdateImageRequest;
 use App\Http\Requests\UpdateInfoMeRequest;
+use App\Http\Responses\ResponseError;
 use App\Services\UserService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -98,5 +100,20 @@ class UserController extends Controller
             ]
         ]);
         return response()->json($update->toArray());
+    }
+
+    public function infoUser($userOid):JsonResponse
+    {
+        $info = $this->userService->infoUser($userOid);
+        return response()->json($info->toArray());
+    }
+
+    public function listImage(Request $request,$userOid)
+    {
+        $lastOid = (string)$request->get('last_oid','');
+
+        if(!StrHelper::isObjectId($userOid) || (!empty($lastOid)) && !StrHelper::isObjectId($lastOid)) return response()->json((new ResponseError(422,"user_oid invalid."))->toArray());
+        $data = $this->userService->listImage($lastOid,$userOid);
+        return response()->json($data->toArray());
     }
 }

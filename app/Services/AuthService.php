@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Helpers\CurlHelper;
 use App\Helpers\GoogleCloudStorageHelper;
+use App\Helpers\StrHelper;
 use App\Http\Responses\ApiResponse;
 use App\Http\Responses\ResponseError;
 use App\Http\Responses\ResponseSuccess;
@@ -11,6 +12,7 @@ use App\Models\User;
 use App\Repositories\UserRepository;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Jenssegers\Mongodb\Eloquent\Model;
 
 class AuthService
@@ -80,5 +82,70 @@ class AuthService
             "register_info_first" => !($user->age===null),
             'token' => $token,
         ]);
+    }
+
+    /**
+     * @param string $email
+     * @param string $password
+     *
+     * @return \App\Http\Responses\ApiResponse
+     */
+    public function registerWithEmail(string $email, string $password):ApiResponse
+    {
+        /** @var User|null $user */
+        $user = $this->userRepository->findOne([
+            'email' => $email,
+        ]);
+
+        if(!is_null($user) && $user->verify_account) return new ResponseError(201,"Tài khoản email đã được đăng ký");
+
+        if(is_null($user)){
+            /** @var User $user */
+            $user = $this->create([
+                'email' => $email,
+                'password' => Hash::make($password),
+                'id' => $this->userRepository->counter()
+            ]);
+        }else{
+            $user->update([
+                'password' => Hash::make($password)
+            ]);
+        }
+
+        $data = $this->authLogin($user)->getData();
+
+        $send = Mail::send('mail_datinee', array('url_verify'=>route('verify.email',[
+            'token' => StrHelper::securedEncrypt($user->_id,md5($user->_id)),
+            'user_id' => $user->id
+        ])), function($message) use ($email){
+            $message->to($email, 'Visitor')->subject('Datinee xác thực tài khoản!');
+        });
+
+        $data['token'] = "";
+
+        return new ResponseSuccess($data,"Chúng tôi đã gửi email xác nhận tài khoản tới địa chỉ của bạn.");
+
+    }
+
+    /**
+     * @param int    $userId
+     * @param string $encode
+     *
+     * @return string
+     */
+    public function verifyEmail(int $userId, string $encode):string
+    {
+        /** @var User|null $user */
+        $user = $this->userRepository->findOne([
+            'id' => $userId
+        ]);
+
+        if(is_null($user)) return "";
+
+        $userOid = StrHelper::securedDecrypt($encode,md5($user->_id));
+
+        if($userOid==="") return "";
+        $login = $this->authLogin($user);
+        return $login->getData()['token'];
     }
 }

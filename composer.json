@@ -12,7 +12,8 @@
         "laravel/sanctum": "^2.14.1",
         "laravel/tinker": "^2.7",
         "spatie/laravel-google-cloud-storage": "2.0.2",
-        "tymon/jwt-auth": "^1.0"
+        "tymon/jwt-auth": "^1.0",
+      "ext-openssl": "*"
     },
     "require-dev": {
         "jenssegers/mongodb": "^3.8",
