@@ -53,17 +53,9 @@ class UserService
             return new ResponseSuccess([], "Thêm sở thích để mọi người biết rõ về bạn hơn.");
         }
 
-        $favorites = $this->favoriteRepository->find([
+        $this->favoriteRepository->deleteByCond([
             'user_id' => Auth::user()->id
-        ])->toArray();
-
-        $list = array_filter($data, function ($key) use ($favorites) {
-            return array_search($key, array_column($favorites, 'key')) === false;
-        });
-
-        if (count($list) === 0) {
-            return new ResponseSuccess([], "Thêm sở thích để mọi người biết rõ về bạn hơn.");
-        }
+        ]);
 
         $add = array_map(function ($key) {
             return [
@@ -73,7 +65,7 @@ class UserService
                 'created_at' => new UTCDateTime(time() * 1000),
                 'updated_at' => new UTCDateTime(time() * 1000)
             ];
-        }, array_values($list));
+        }, array_values($data));
 
         $this->favoriteRepository->insert($add);
 

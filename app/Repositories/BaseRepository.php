@@ -103,6 +103,16 @@ class BaseRepository
     }
 
     /**
+     * @param array $cond
+     *
+     * @return mixed
+     */
+    public function deleteByCond(array $cond):mixed
+    {
+        return $this->model::query()->where($cond)->delete();
+    }
+
+    /**
      * @inheritdoc
      */
     public function deleteByIds(array $ids)
