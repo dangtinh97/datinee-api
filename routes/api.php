@@ -34,6 +34,13 @@ Route::group([
     Route::get('/matching',[\App\Http\Controllers\Api\MatchingController::class,'index']);
     Route::get('/messages/room',[\App\Http\Controllers\Api\ChatController::class,'room']);
     Route::get('/messages/{user_oid}',[\App\Http\Controllers\Api\ChatController::class,'message']);
+});
 
+Route::get('/',function (){
+   return response()->setStatusCode(404)->json(json_encode([
+       'status' => 404,
+       'content' => 'Page not found!',
+       'data' => []
+   ]));
 });
 

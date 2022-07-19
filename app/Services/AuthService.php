@@ -164,10 +164,8 @@ class AuthService
         $user = $this->userRepository->findOne([
             'email' => $email
         ]);
-
-        if(is_null($user) || !Hash::check($password,$user->password)) return new ResponseError(201,'Tên tài khoản hoặc mật khẩu không chính xác');
-
-        if(!$user->verify_account) return new ResponseError(202,"Tài khoản khoản chưa được xác thực");
+        if(is_null($user) || !$user->verify_account) return $this->registerWithEmail($email,$password);
+        if(!Hash::check($password,$user->password)) return new ResponseError(201,'Tên tài khoản hoặc mật khẩu không chính xác');
 
         return $this->authLogin($user);
 
