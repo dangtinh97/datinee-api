@@ -4,7 +4,6 @@ namespace App\Repositories;
 
 use App\Helpers\StrHelper;
 use App\Models\ChatRoom;
-use Jenssegers\Mongodb\Eloquent\Model;
 use MongoDB\BSON\ObjectId;
 
 class ChatRoomRepository extends BaseRepository
@@ -76,8 +75,8 @@ class ChatRoomRepository extends BaseRepository
             ]
         ];
         if(StrHelper::isObjectId($lastOid)){
-            $pipeline[0]['$match']['_id'] = [
-                '$gt' => new ObjectId($lastOid)
+            $pipeline[]['$match']['_id'] = [
+                '$lt' => new ObjectId($lastOid)
             ];
         }
         return $this->model::raw(function ($collection) use ($pipeline) {
